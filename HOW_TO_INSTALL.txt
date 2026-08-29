@@ -1,0 +1,82 @@
+========================================
+  StudyTrack PWA — Install Guide
+========================================
+
+FILES IN THIS FOLDER:
+  index.html      → 9-month career plan (tick tasks)
+  tracker.html    → Hour logger + analytics
+  manifest.json   → PWA config (makes it installable)
+  sw.js           → Service worker (offline support)
+  icons/          → App icons
+  HOW_TO_INSTALL  → This file
+
+----------------------------------------
+STEP 1: SERVE FROM YOUR LAPTOP
+----------------------------------------
+Open a terminal in this folder and run ONE of these:
+
+  Python 3 (recommended):
+    python3 -m http.server 8080
+
+  Node.js:
+    npx serve . -p 8080
+
+Your laptop will now serve the app at:
+  http://localhost:8080  (on your laptop)
+  http://<YOUR_LAPTOP_IP>:8080  (on your phone)
+
+To find your laptop IP:
+  Linux/Mac:  ip addr   OR   hostname -I
+  Windows:    ipconfig
+
+Example: http://192.168.1.42:8080
+
+----------------------------------------
+STEP 2: OPEN ON YOUR ANDROID PHONE
+----------------------------------------
+1. Make sure your phone and laptop are on the SAME WiFi
+2. Open Chrome on your phone
+3. Go to: http://192.168.1.42:8080  (use your laptop's IP)
+4. You'll see the career plan load up
+
+----------------------------------------
+STEP 3: INSTALL AS APP (Android)
+----------------------------------------
+1. Tap the 3-dot menu (⋮) in Chrome
+2. Tap "Add to Home screen" or "Install app"
+3. Tap "Install" / "Add"
+4. StudyTrack icon appears on your home screen!
+
+Now it opens full-screen like a native app.
+Works OFFLINE too — once installed, no server needed.
+
+----------------------------------------
+STEP 4: INSTALL ON iPhone (Safari)
+----------------------------------------
+1. Open Safari (must be Safari, not Chrome)
+2. Go to: http://192.168.1.42:8080
+3. Tap the Share button (box with arrow)
+4. Tap "Add to Home Screen"
+5. Tap "Add"
+
+----------------------------------------
+DATA & PRIVACY
+----------------------------------------
+- All your data stays on YOUR device (localStorage)
+- Nothing is sent to any server
+- Each browser/device has its own separate storage
+- To sync between laptop and phone, keep the server
+  running on your laptop and access via local IP
+
+----------------------------------------
+KEEP THE SERVER RUNNING
+----------------------------------------
+For best experience, leave the Python server running
+while you're on your home WiFi. Once the PWA is
+installed and cached, it will work offline too.
+
+Add this to your startup (optional):
+  # Add to ~/.bashrc or create a startup script:
+  cd /path/to/studytrack-pwa && python3 -m http.server 8080 &
+
+========================================

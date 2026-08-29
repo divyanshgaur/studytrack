@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1D9E75">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="StudyTrack">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>9-Month Career Plan</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+
+/* TOP NAV BAR linking to tracker */
+.app-bar{background:#111;border-bottom:0.5px solid #1e1e1e;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.app-bar-title{font-size:15px;font-weight:600;color:#f0f0f0}.app-bar-title span{color:#1D9E75}
+.app-bar-link{font-size:12px;color:#1D9E75;text-decoration:none;background:#0d3d2e;border:0.5px solid #1D9E75;padding:5px 10px;border-radius:7px}
+.install-banner{background:#0d3d2e;border:0.5px solid #1D9E75;border-radius:10px;padding:10px 14px;margin:12px 16px 0;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#5DCAA5}
+.install-banner button{background:#1D9E75;border:none;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer}
+.install-banner.hidden{display:none}
+
+.wrap{max-width:1100px;margin:0 auto;padding:1rem 16px 80px}
+.plan-header{padding-bottom:1rem;border-bottom:0.5px solid #1f1f1f;margin-bottom:1.25rem}
+.plan-header h1{font-size:18px;font-weight:500;color:#f0f0f0}
+.plan-header p{font-size:12px;color:#666;margin-top:4px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+.stat-card{background:#161616;border:0.5px solid #222;border-radius:10px;padding:0.85rem;text-align:center}
+.stat-num{font-size:20px;font-weight:500;color:#e8e8e8}
+.stat-lbl{font-size:10px;color:#555;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em}
+.phase-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:1.25rem}
+@media(min-width:600px){.phase-grid{grid-template-columns:repeat(3,1fr)}}
+.phase-card{background:#161616;border:0.5px solid #222;border-radius:12px;padding:0.9rem;cursor:pointer;transition:border-color 0.15s}
+.phase-card.active{border:2px solid #1D9E75}
+.phase-label{font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px}
+.ph0 .phase-label{color:#5DCAA5}.ph1 .phase-label{color:#85B7EB}.ph2 .phase-label{color:#AFA9EC}
+.phase-card h3{font-size:14px;font-weight:500;color:#e8e8e8;margin-bottom:4px}
+.phase-card p{font-size:12px;color:#555;line-height:1.5}
+.phase-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;margin-bottom:8px}
+.ph0 .phase-badge{background:#092e24;color:#5DCAA5}
+.ph1 .phase-badge{background:#0a2e4a;color:#85B7EB}
+.ph2 .phase-badge{background:#251e54;color:#AFA9EC}
+.detail-panel{background:#161616;border:0.5px solid #222;border-radius:12px;padding:1rem;margin-bottom:1.25rem}
+.detail-panel h3{font-size:15px;font-weight:500;color:#e8e8e8;margin-bottom:0.75rem}
+.tab-row{display:flex;gap:6px;margin-bottom:1rem;overflow-x:auto;padding-bottom:4px}
+.tab-btn{font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid #2a2a2a;background:transparent;color:#666;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.tab-btn.active-tab{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.tracks{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:600px){.tracks{grid-template-columns:repeat(3,1fr)}}
+.track{background:#111;border-radius:8px;padding:0.85rem}
+.track-title{font-size:12px;font-weight:500;color:#777;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.track-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.d-cpp{background:#1D9E75}.d-rhcsa{background:#378ADD}.d-k8s{background:#7F77DD}
+.d-os{background:#D85A30}.d-net{background:#BA7517}.d-des{background:#D4537E}
+.task-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer;padding:6px;border-radius:6px}
+.task-item:active{background:#1a1a1a}
+.task-cb{width:18px;height:18px;border:1.5px solid #2e2e2e;border-radius:4px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center}
+.task-cb.checked{background:#1D9E75;border-color:#1D9E75}
+.task-cb.checked::after{content:'';display:block;width:5px;height:8px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg);margin-top:-2px}
+.task-text{font-size:13px;color:#ccc;line-height:1.6}
+.task-text.done{color:#3a3a3a;text-decoration:line-through}
+.section-label{font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:#444;margin-bottom:8px}
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.prog-label{font-size:12px;color:#666;width:110px;flex-shrink:0}
+.prog-bar{flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width 0.4s ease}
+.prog-pct{font-size:12px;color:#444;width:36px;text-align:right}
+.progress-section{margin-bottom:1.25rem}
+.milestone-list{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:1.25rem}
+@media(min-width:600px){.milestone-list{grid-template-columns:1fr 1fr}}
+.milestone{background:#161616;border-radius:8px;padding:0.75rem;display:flex;align-items:flex-start;gap:8px;cursor:pointer;border:0.5px solid #1e1e1e}
+.m-icon{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:1px;background:#111;border:1.5px solid #2a2a2a}
+.m-icon.done{background:#092e24;border-color:#1D9E75}
+.m-done-text{color:#5DCAA5;font-size:9px;font-weight:700}
+.m-text{font-size:12px;color:#ccc;line-height:1.4}
+.m-sub{font-size:11px;color:#444;margin-top:2px}
+.resources-btn{display:inline-flex;align-items:center;font-size:12px;border:0.5px solid #222;border-radius:8px;padding:6px 12px;background:transparent;color:#888;cursor:pointer;margin-right:8px;margin-bottom:8px;text-decoration:none}
+.header-actions{display:flex;align-items:center;margin-top:8px;gap:8px}
+.reset-btn{font-size:11px;color:#444;background:transparent;border:0.5px solid #222;border-radius:6px;padding:4px 10px;cursor:pointer}
+.save-indicator{font-size:11px;color:#1D9E75;opacity:0;transition:opacity 0.3s}
+.save-indicator.show{opacity:1}
+
+/* Bottom tab bar for mobile */
+.bottom-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:#111;border-top:0.5px solid #1e1e1e;padding:8px 0;padding-bottom:env(safe-area-inset-bottom);z-index:100}
+@media(max-width:768px){.bottom-bar{display:flex;justify-content:space-around}}
+.bottom-tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;cursor:pointer;text-decoration:none;color:#555;font-size:10px;border-radius:8px}
+.bottom-tab.active{color:#1D9E75}
+.bottom-tab-icon{font-size:20px}
+</style>
+</head>
+<body>
+
+<div class="app-bar">
+  <div class="app-bar-title">study<span>.</span>track</div>
+  <a class="app-bar-link" href="tracker.html">⏱ Log hours</a>
+</div>
+
+<div class="install-banner" id="installBanner">
+  <span>📲 Install as app for offline access</span>
+  <button onclick="installPWA()">Install</button>
+</div>
+
+<div class="wrap">
+<div class="plan-header">
+  <h1>9-Month Career Plan</h1>
+  <p>QE → Systems / Infrastructure Engineer · tap phase → tab → tick tasks</p>
+  <div class="header-actions">
+    <span class="save-indicator" id="saveIndicator">✓ Saved</span>
+    <button class="reset-btn" onclick="resetAll()">Reset progress</button>
+  </div>
+</div>
+
+<div class="stat-row">
+  <div class="stat-card"><div class="stat-num" id="sDone">0</div><div class="stat-lbl">done</div></div>
+  <div class="stat-card"><div class="stat-num" id="sTotal">0</div><div class="stat-lbl">tasks</div></div>
+  <div class="stat-card"><div class="stat-num" id="sPct">0%</div><div class="stat-lbl">progress</div></div>
+</div>
+
+<div class="phase-grid">
+  <div class="phase-card ph0 active" onclick="setPhase(0)" id="ph0">
+    <span class="phase-badge">Months 1–3</span><h3>Build foundations</h3>
+    <p>C++ basics, Docker, OS fundamentals, networking intro, OOP</p>
+  </div>
+  <div class="phase-card ph1" onclick="setPhase(1)" id="ph1">
+    <span class="phase-badge">Months 4–6</span><h3>Go deeper</h3>
+    <p>C++ OOP, RHCSA prep, K8s core, OS internals, SOLID design</p>
+  </div>
+  <div class="phase-card ph2" onclick="setPhase(2)" id="ph2">
+    <span class="phase-badge">Months 7–9</span><h3>Apply & certify</h3>
+    <p>RHCSA exam, system design interviews, capstone project</p>
+  </div>
+</div>
+
+<div class="detail-panel">
+  <h3 id="detailTitle">Phase 1: Build foundations (months 1–3)</h3>
+  <div class="tab-row" id="tabRow"></div>
+  <div class="tracks" id="trackGrid"></div>
+</div>
+
+<div class="progress-section">
+  <div class="section-label">Track progress</div>
+  <div id="progBars"></div>
+</div>
+
+<div class="section-label">Key milestones</div>
+<div class="milestone-list">
+  <div class="milestone" onclick="toggleMs(0)"><div class="m-icon" id="mi0"></div><div><div class="m-text">Write a working C++ CLI tool with argument parsing</div><div class="m-sub">Month 2 · C++</div></div></div>
+  <div class="milestone" onclick="toggleMs(1)"><div class="m-icon" id="mi1"></div><div><div class="m-text">Containerise a QE test suite end-to-end with Docker</div><div class="m-sub">Month 3 · Docker & K8s</div></div></div>
+  <div class="milestone" onclick="toggleMs(2)"><div class="m-icon" id="mi2"></div><div><div class="m-text">Explain process scheduling & virtual memory to a peer</div><div class="m-sub">Month 3 · OS</div></div></div>
+  <div class="milestone" onclick="toggleMs(3)"><div class="m-icon" id="mi3"></div><div><div class="m-text">Trace a full HTTP request from browser to server</div><div class="m-sub">Month 3 · Networking</div></div></div>
+  <div class="milestone" onclick="toggleMs(4)"><div class="m-icon" id="mi4"></div><div><div class="m-text">Refactor a codebase applying all 5 SOLID principles</div><div class="m-sub">Month 5 · System Design</div></div></div>
+  <div class="milestone" onclick="toggleMs(5)"><div class="m-icon" id="mi5"></div><div><div class="m-text">Complete all RHCSA practice exams with ≥80%</div><div class="m-sub">Month 6 · RHCSA</div></div></div>
+  <div class="milestone" onclick="toggleMs(6)"><div class="m-icon" id="mi6"></div><div><div class="m-text">Deploy a microservice to a local K8s cluster (minikube)</div><div class="m-sub">Month 6 · Docker & K8s</div></div></div>
+  <div class="milestone" onclick="toggleMs(7)"><div class="m-icon" id="mi7"></div><div><div class="m-text">Design URL shortener + rate limiter on whiteboard</div><div class="m-sub">Month 7 · System Design</div></div></div>
+  <div class="milestone" onclick="toggleMs(8)"><div class="m-icon" id="mi8"></div><div><div class="m-text">Pass the RHCSA exam</div><div class="m-sub">Month 7–8 · RHCSA</div></div></div>
+  <div class="milestone" onclick="toggleMs(9)"><div class="m-icon" id="mi9"></div><div><div class="m-text">Build & deploy C++/K8s microservice applying SOLID</div><div class="m-sub">Month 9 · Capstone</div></div></div>
+</div>
+
+<div class="section-label" style="margin-top:0.5rem">Resources</div>
+<div style="padding-bottom:1rem">
+  <a class="resources-btn" href="https://learncpp.com" target="_blank">LearnCPP.com ↗</a>
+  <a class="resources-btn" href="https://cppreference.com" target="_blank">cppreference ↗</a>
+  <a class="resources-btn" href="https://ostep.org" target="_blank">OSTEP ↗</a>
+  <a class="resources-btn" href="https://godbolt.org" target="_blank">Compiler Explorer ↗</a>
+</div>
+</div>
+
+<!-- Bottom nav for mobile -->
+<div class="bottom-bar">
+  <a class="bottom-tab active" href="index.html"><span class="bottom-tab-icon">📋</span>Plan</a>
+  <a class="bottom-tab" href="tracker.html"><span class="bottom-tab-icon">⏱</span>Tracker</a>
+</div>
+
+<script>
+const STORAGE_KEY='cpp_career_plan_v1';
+const tracks=[
+  {id:'cpp',name:'C++',dot:'d-cpp',color:'#1D9E75'},
+  {id:'rhcsa',name:'RHCSA',dot:'d-rhcsa',color:'#378ADD'},
+  {id:'k8s',name:'Docker & K8s',dot:'d-k8s',color:'#7F77DD'},
+  {id:'os',name:'OS',dot:'d-os',color:'#D85A30'},
+  {id:'net',name:'Networking',dot:'d-net',color:'#BA7517'},
+  {id:'des',name:'System Design',dot:'d-des',color:'#D4537E'},
+];
+const phases=[
+  {title:'Phase 1: Build foundations (months 1–3)',groups:[
+    [{t:'cpp',tasks:['Install g++, CMake and set up VS Code for C++','Understand the C++ compilation pipeline: preprocessor → compiler → linker','Learn primitive types, variables, const and auto','Master pointers: declaration, dereferencing, pointer arithmetic','Learn references and understand how they differ from pointers','Write functions: pass by value, pass by reference, pass by pointer','Control flow: if/else, switch, for, while, range-based for','Arrays and std::vector basics — indexing and iteration','Strings: std::string, concatenation, common methods','Complete LearnCPP.com chapters 1–8 with all exercises','Stack vs heap: understand when each is used','Intro to structs — grouping related data','Write a CLI address book app (add/list/search contacts)','Intro to file I/O: read and write text files in C++','Complete LearnCPP.com chapters 9–14']},{t:'rhcsa',tasks:['Set up a Rocky Linux 9 VM (VirtualBox or KVM)','Navigate the filesystem: ls, cd, pwd, find, locate','Understand Linux directory structure: /, /etc, /var, /home, /proc','File permissions: chmod, chown, chgrp, umask','User and group management: useradd, usermod, groupadd, passwd','Package management with dnf: install, update, remove, search','Basic shell scripting: variables, conditionals, loops','Write a script to automate a repetitive sysadmin task','Archiving and compression: tar, gzip, bzip2','Searching with grep, awk, sed — practical examples','Understand hard links vs symbolic links','SSH key-based authentication setup','Introduction to vim: navigation, insert, save, quit','Study the RHCSA exam objectives list top to bottom','Complete 2 hours of hands-on labs per week on your VM']},{t:'k8s',tasks:['Understand what containers are and why they exist','Install Docker Desktop or Docker Engine on your machine','Run your first container: docker run hello-world','Explore a running container: docker exec, docker logs','Write a Dockerfile for a simple Python or Node app','Understand layers, caching and image size optimisation','Build and tag your own Docker image','Push an image to Docker Hub','Use docker-compose to run a multi-container app (app + db)','Containerise one of your existing QE test scripts','Understand container networking: bridge, host, none','Use bind mounts and volumes to persist data','Docker build best practices: .dockerignore, multi-stage builds','Explore docker stats, docker inspect for troubleshooting','Write a docker-compose for a test environment (app + mock server)']}],
+    [{t:'os',tasks:['Read OSTEP Chapter 1–4: intro to OS, virtualisation overview','Understand what a kernel is and kernel vs userspace boundary','Processes: creation, lifecycle, PCB, fork() and exec()','Threads vs processes: when to use which','Context switching: what happens at the CPU level','CPU scheduling algorithms: FIFO, SJF, Round Robin, CFS','Read OSTEP Chapters 5–9: process API and scheduling','Virtual memory: why it exists, address spaces','Paging: page tables, TLB, page faults explained','Segmentation vs paging trade-offs','Read OSTEP Chapters 13–18: address spaces and paging','File systems: inodes, directories, hard vs soft links','How Linux VFS works (conceptual overview)','I/O: blocking vs non-blocking, polling vs interrupts','Run experiments: use top, htop, vmstat, iostat on your Linux VM']},{t:'net',tasks:['Understand the OSI model — all 7 layers with examples','TCP/IP model: how it maps to OSI, what each layer does','IP addressing: IPv4, subnet masks, CIDR notation','Subnetting practice: calculate network/broadcast addresses','ARP: how IP maps to MAC addresses','Understand how DNS resolution works step by step','TCP: three-way handshake, four-way teardown, sequence numbers','UDP: when it is used and why (DNS, video, games)','HTTP/1.1 vs HTTP/2: request/response cycle, headers, status codes','HTTPS: TLS handshake, certificates, CA chain of trust','Use curl and Wireshark/tcpdump to inspect real HTTP traffic','NAT: how home routers translate addresses','Firewalls: stateful vs stateless, iptables basics on Linux','Practice subnetting until you can solve problems in 2 minutes','Read "Computer Networking: A Top-Down Approach" chapters 1–3']},{t:'des',tasks:['What is OOP? Real-world analogies for objects and classes','Classes in C++: constructors, destructors, member variables','Encapsulation: public, private, protected access control','Getters and setters — when and why','Inheritance in C++: base class, derived class, method override','Polymorphism: virtual functions, vtable, runtime dispatch','Abstract classes and pure virtual functions in C++','Composition vs inheritance — prefer composition rule','UML class diagrams: draw 3 real-world systems as diagrams','Design a simple bank account system using OOP in C++','What is the Single Responsibility Principle? — with example','What is the Open/Closed Principle? — with example','Identify violations of SRP and OCP in a sample codebase','Read Head First Design Patterns chapters 1–3','Implement a simple design pattern: Strategy or Observer in C++']}],
+  ]},
+  {title:'Phase 2: Go deeper (months 4–6)',groups:[
+    [{t:'cpp',tasks:['Classes deep dive: copy constructor, copy assignment, Rule of Three','Move semantics: rvalue references, std::move, Rule of Five','Smart pointers: unique_ptr, shared_ptr, weak_ptr — when to use each','Operator overloading: implement +, ==, << for a custom type','Templates: function templates and class templates basics','STL containers: vector, list, map, unordered_map, set — pick the right one','STL algorithms: sort, find, transform, accumulate with lambdas','Lambdas and std::function — closures in C++','Exception handling: try/catch/throw, custom exception classes','Namespaces and header/source file organisation','Build system deep dive: CMakeLists.txt with libraries and tests','Unit testing in C++: Google Test setup and writing test cases','Write a C++ library with a public API and test it with GTest','Debugging with gdb: breakpoints, watchpoints, stack traces','Write a multi-file C++ project used in your real build pipeline']},{t:'rhcsa',tasks:['Networking config: nmcli — create, modify, delete connections','Set a static IP address and configure DNS on Rocky Linux','Firewall management: firewall-cmd, zones, services, ports','SSH hardening: disable root login, change port, key-only auth','Storage: fdisk/parted to create and manage partitions','LVM: create PV, VG, LV — extend and resize logical volumes','Filesystems: create and mount ext4 and xfs filesystems','Persistent mounts: configure /etc/fstab correctly','Swap space: create and activate a swap partition or file','systemd: enable, disable, start, stop, mask services','Writing a basic systemd unit file for a custom service','Scheduled tasks: cron, anacron, at, systemd timers','SELinux: enforcing vs permissive, contexts, chcon, restorecon','SELinux booleans and troubleshooting with audit2allow','Take 3 full timed RHCSA practice exams and review all failures']},{t:'k8s',tasks:['Kubernetes architecture: control plane, worker nodes, etcd','Install minikube and kubectl on your machine','Run your first pod: kubectl run, kubectl get pods, kubectl describe','YAML manifests: write a Pod manifest from scratch','Deployments: create, scale, roll out updates and roll back','Services: ClusterIP, NodePort, LoadBalancer — when to use each','Namespaces: organise workloads, set resource quotas','ConfigMaps: externalise config and mount as env vars or files','Secrets: create and consume secrets securely in a pod','Persistent Volumes and PVCs: attach storage to a pod','Liveness and readiness probes: configure for a real app','Resource requests and limits: prevent noisy-neighbour problems','Rolling updates and blue/green deployment strategies','kubectl exec, logs, port-forward for troubleshooting','Deploy a full app (web + db + config) to minikube using manifests']}],
+    [{t:'os',tasks:['Concurrency: race conditions, critical sections, mutual exclusion','Locks: mutex, spinlock — implementation and trade-offs','Condition variables: producer-consumer problem in C++','Semaphores: binary vs counting, dining philosophers problem','Deadlocks: conditions for deadlock, prevention strategies','Read OSTEP Chapters 25–34: concurrency','Inter-process communication: pipes, FIFOs, message queues','Shared memory with mmap and POSIX shared memory in C++','Unix sockets: client-server echo program in C++','Signals: signal(), kill(), sigaction() — write a signal handler','Linux cgroups: what they are, create a cgroup, limit CPU/memory','Linux namespaces: PID, net, mnt — what each isolates','Understand how Docker uses cgroups + namespaces under the hood','strace: trace syscalls of a running process, interpret the output','Read OSTEP Chapters 36–40: I/O devices and file systems']},{t:'net',tasks:['TCP congestion control: slow start, AIMD, CWND explained','Socket programming in C++: write a TCP echo server and client','Socket programming in C++: write a UDP client and server','Non-blocking I/O and select()/poll()/epoll() — event loop concept','HTTP deep dive: methods, headers, cookies, caching (ETag, Cache-Control)','REST principles: statelessness, resources, verbs, status codes','gRPC: protobuf basics, define a .proto, generate C++ stubs','TLS in depth: cipher suites, certificate pinning, HSTS','DNS deep dive: A, CNAME, MX, TXT records, TTL, recursive vs authoritative','Load balancing: round robin, least connections, consistent hashing','Reverse proxies: what nginx/HAProxy do, configure a simple one','VPNs and tunnelling: IPSec, WireGuard conceptual overview','Network troubleshooting toolkit: ping, traceroute, ss, netstat, nmap','Analyse a TCP handshake in Wireshark — label each packet','Read "Computer Networking: A Top-Down Approach" chapters 4–6']},{t:'des',tasks:['SOLID: Liskov Substitution Principle — examples and violations','SOLID: Interface Segregation Principle — fat interface anti-pattern','SOLID: Dependency Inversion Principle — depend on abstractions','Apply all 5 SOLID principles: refactor a 300-line C++ class','Design patterns: Factory Method — implement in C++','Design patterns: Abstract Factory — implement in C++','Design patterns: Builder — construct complex objects step by step','Design patterns: Observer — event system example in C++','Design patterns: Strategy — swappable algorithms in C++','Design patterns: Decorator — add behaviour without inheritance','Anti-patterns: God Object, Spaghetti Code, Magic Numbers — identify in code','System design intro: what is a distributed system?','Scalability basics: vertical vs horizontal scaling','CAP theorem: consistency, availability, partition tolerance — trade-offs','Design a simple key-value store: discuss components and trade-offs']}],
+  ]},
+  {title:'Phase 3: Apply & certify (months 7–9)',groups:[
+    [{t:'cpp',tasks:["Multithreading: std::thread, join, detach, thread lifecycle","Mutex and lock_guard: protect shared state across threads","Condition variables in C++: notify_one, notify_all, wait","Thread pool: implement a simple fixed-size thread pool","Atomic operations: std::atomic, lock-free programming basics","Memory model: happens-before, acquire/release semantics","Performance profiling with perf and gprof — identify hot paths","Memory profiling with valgrind/AddressSanitizer — fix leaks","Integrate your C++ library into a Jenkins or GitHub Actions CI pipeline","Open source contribution: submit a bug fix PR to a C++ OSS project","Implement a small gRPC service in C++ using your networking knowledge","Write a C++ daemon that runs as a systemd service on Linux","Document your C++ project with Doxygen","Code review: review a peer's C++ code and give structured feedback","Capstone: build a C++ microservice that solves a real problem at work"]},{t:'rhcsa',tasks:['Book the RHCSA exam — set a fixed date to create urgency','Full exam simulation week 1: timed 3-hour lab, mark and review','Fix every failure from simulation week 1 with hands-on practice','Full exam simulation week 2: different scenario set, mark and review','Weak area sprint: dedicate 3 days to your two weakest RHCSA topics','Speed drill: complete each objective category in under 10 minutes','Practise with no internet — exam is hands-on with no docs access','Review all man pages for key commands: man nmcli, man firewall-cmd','Ensure you can configure LVM and SELinux completely from memory','Sit and pass the RHCSA exam','Write a blog post or LinkedIn post about your RHCSA journey','Begin exploring RHCE (next cert) objectives for future planning','Set up Ansible basics — the bridge from RHCSA to RHCE','Automate your Linux VM setup with a bash script end-to-end','Use your RHCSA skills to harden the Linux nodes in your K8s cluster']},{t:'k8s',tasks:['Helm: install Helm, explore Artifact Hub, deploy a chart','Write your own Helm chart for your C++ microservice','Horizontal Pod Autoscaler: configure and trigger a scale event','Vertical Pod Autoscaler: understand and compare with HPA','Ingress controllers: install nginx ingress, route traffic to services','Network policies: restrict pod-to-pod communication','RBAC: create roles, role bindings, service accounts','Kubernetes secrets management: sealed-secrets or external-secrets','Monitoring: deploy Prometheus + Grafana on minikube','Logging: deploy Loki or EFK stack, query logs from your app','CI/CD pipeline: build image → push to registry → deploy to K8s via GitHub Actions','Multi-stage Docker build for your C++ service (builder + runtime image)','Resource quotas and LimitRanges at namespace level','Kubernetes troubleshooting: CrashLoopBackOff, OOMKilled, Pending — fix each','Capstone: full CI/CD pipeline deploying your C++ service to K8s']}],
+    [{t:'os',tasks:['Memory-mapped files: mmap() to process a large file in C++','Copy-on-write: understand how fork() is optimised by the kernel','Huge pages: what they are, when to use, how to enable on Linux','NUMA: non-uniform memory access overview for multi-socket systems','Linux perf: profile a C++ program, generate flame graphs','eBPF overview: what it is and how it enables modern observability tools','Containers deep dive: implement a mini-container using clone() in C++','Overlay filesystems: how Docker layers work (OverlayFS)','Kernel tuning: sysctl parameters for networking and memory','Write a blog post explaining one OS concept using a Linux experiment','Study OS questions from system design interview resources','Review: re-read your OSTEP notes and close any open gaps','OS in interviews: practice explaining scheduling, paging, IPC out loud','Explore Linux kernel source for one subsystem (e.g. scheduler)','Build and boot a minimal Linux kernel in a VM (optional stretch goal)']},{t:'net',tasks:['Service meshes: what Istio/Linkerd do and why (conceptual)','K8s networking deep dive: kube-proxy, CNI plugins, pod-to-pod routing','Network policies in K8s: write and test ingress/egress rules','Message queues: RabbitMQ vs Kafka — when to use each','WebSockets: upgrade handshake, use case vs HTTP polling','QUIC and HTTP/3: what changed and why it matters','Implement a simple HTTP/1.1 server from scratch in C++ using sockets','Add TLS to your C++ HTTP server using OpenSSL','BGP overview: how the internet routes between autonomous systems','CDN: how content delivery networks work, edge caching concepts','Network observability: use eBPF-based tools (e.g. Pixie, Hubble)','Network interview prep: explain TCP vs UDP, DNS lookup, load balancing','Practice drawing network diagrams for distributed systems','Review all networking concepts and create a personal cheat sheet','Integrate networking knowledge into your capstone system design doc']},{t:'des',tasks:['System design framework: functional vs non-functional requirements','Estimation: back-of-envelope QPS, storage, bandwidth calculations','Design a URL shortener: end-to-end with DB, cache, API, CDN','Design a rate limiter: token bucket vs sliding window algorithms','Design a notification system: fan-out, push vs pull, at-least-once delivery','Design a distributed key-value store: consistent hashing, replication','Design a news feed (like Twitter/LinkedIn): ranking, storage, delivery','Design a file storage service (like Dropbox): chunking, dedup, sync','Deep dive: database selection — SQL vs NoSQL trade-offs','Deep dive: caching strategies — write-through, write-back, eviction','Deep dive: message queues in system design — async decoupling','Deep dive: search indexing — how Elasticsearch works conceptually','Mock system design interview #1: 45-minute session, record and review','Mock system design interview #2: different problem, apply feedback','Write a system design document for your capstone C++/K8s project']}],
+  ]},
+];
+
+const taskState={};const msState={};
+let curPhase=0,curGroup=0;
+function load(){try{const s=localStorage.getItem(STORAGE_KEY);if(s){const d=JSON.parse(s);Object.assign(taskState,d.tasks||{});Object.assign(msState,d.milestones||{});}}catch(e){}}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({tasks:taskState,milestones:msState}));const i=document.getElementById('saveIndicator');i.classList.add('show');clearTimeout(i._t);i._t=setTimeout(()=>i.classList.remove('show'),1500);}catch(e){}}
+function taskKey(p,g,ti,i){return`${p}_${g}_${ti}_${i}`}
+function countAll(){let d=0,t=0;phases.forEach((ph,pi)=>ph.groups.forEach((gr,gi)=>gr.forEach((tr,ti)=>tr.tasks.forEach((_,i)=>{t++;if(taskState[taskKey(pi,gi,ti,i)])d++;}))));return{d,t}}
+function updateStats(){const{d,t}=countAll();document.getElementById('sDone').textContent=d;document.getElementById('sTotal').textContent=t;document.getElementById('sPct').textContent=Math.round(d/t*100)+'%';}
+function renderTabs(){const row=document.getElementById('tabRow');row.innerHTML='';['Core skills (C++, RHCSA, K8s)','Foundations (OS, Net, Design)'].forEach((label,g)=>{const btn=document.createElement('button');btn.className='tab-btn'+(g===curGroup?' active-tab':'');btn.textContent=label;btn.onclick=()=>{curGroup=g;renderTabs();renderTracks();};row.appendChild(btn);});}
+function renderTracks(){const grp=phases[curPhase].groups[curGroup];const grid=document.getElementById('trackGrid');grid.innerHTML='';grp.forEach((tr,ti)=>{const meta=tracks.find(t=>t.id===tr.t);const col=document.createElement('div');col.className='track';col.innerHTML=`<div class="track-title"><span class="track-dot ${meta.dot}"></span>${meta.name}</div>`;tr.tasks.forEach((task,i)=>{const key=taskKey(curPhase,curGroup,ti,i);const checked=!!taskState[key];const item=document.createElement('div');item.className='task-item';item.innerHTML=`<div class="task-cb ${checked?'checked':''}" id="cb_${key}"></div><span class="task-text ${checked?'done':''}" id="tt_${key}">${task}</span>`;item.onclick=()=>{taskState[key]=!taskState[key];document.getElementById('cb_'+key).classList.toggle('checked',taskState[key]);document.getElementById('tt_'+key).classList.toggle('done',taskState[key]);updateProgress();updateStats();saveState();};col.appendChild(item);});grid.appendChild(col);});}
+function setPhase(idx){curPhase=idx;curGroup=0;[0,1,2].forEach(i=>document.getElementById('ph'+i).classList.toggle('active',i===idx));document.getElementById('detailTitle').textContent=phases[idx].title;renderTabs();renderTracks();}
+function updateProgress(){const container=document.getElementById('progBars');container.innerHTML='';tracks.forEach(tr=>{let d=0,t=0;phases.forEach((ph,pi)=>ph.groups.forEach((gr,gi)=>{const slot=gr.find(x=>x.t===tr.id);if(slot)slot.tasks.forEach((_,i)=>{t++;if(taskState[taskKey(pi,gi,gr.indexOf(slot),i)])d++;});}));const pct=t?Math.round(d/t*100):0;const row=document.createElement('div');row.className='prog-row';row.innerHTML=`<span class="prog-label">${tr.name}</span><div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${tr.color}"></div></div><span class="prog-pct">${pct}%</span>`;container.appendChild(row);});}
+function renderMilestones(){for(let i=0;i<10;i++){const mi=document.getElementById('mi'+i);if(!mi)continue;if(msState[i]){mi.classList.add('done');mi.innerHTML='<span class="m-done-text">✓</span>';}else{mi.classList.remove('done');mi.innerHTML='';}}}
+function toggleMs(idx){msState[idx]=!msState[idx];renderMilestones();saveState();}
+function resetAll(){if(confirm('Reset all progress?')){Object.keys(taskState).forEach(k=>delete taskState[k]);Object.keys(msState).forEach(k=>delete msState[k]);saveState();setPhase(0);renderMilestones();updateProgress();updateStats();}}
+
+// PWA install
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBanner').classList.remove('hidden');});
+function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('installBanner').classList.add('hidden');});}}
+window.addEventListener('appinstalled',()=>document.getElementById('installBanner').classList.add('hidden'));
+
+// Service worker
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+
+load();setPhase(0);renderMilestones();updateProgress();updateStats();
+// Hide install banner initially
+document.getElementById('installBanner').classList.add('hidden');
+</script>
+</body>
+</html>
