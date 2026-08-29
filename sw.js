@@ -1,8 +1,9 @@
-const CACHE = 'studytrack-v1';
+const CACHE = 'studytrack-v2';
 const ASSETS = [
   '/',
   '/index.html',
   '/tracker.html',
+  '/daily.html',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
@@ -23,6 +24,8 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Don't cache Anthropic API calls
+  if(e.request.url.includes('anthropic.com')) return;
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => caches.match('/index.html')))
   );

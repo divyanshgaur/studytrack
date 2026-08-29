@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#1D9E75">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="StudyTrack">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Hour Tracker — Career Plan</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e8e8e8;min-height:100vh}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:#111;border-right:0.5px solid #1e1e1e;padding:1.25rem;display:flex;flex-direction:column;gap:1rem}
+.sidebar-logo{font-size:15px;font-weight:600;color:#f0f0f0;padding-bottom:0.75rem;border-bottom:0.5px solid #1e1e1e}
+.sidebar-logo span{color:#1D9E75}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:#666;transition:all 0.15s}
+.nav-item:hover{background:#1a1a1a;color:#ccc}
+.nav-item.active{background:#1a1a2e;color:#85B7EB;border:0.5px solid #223}
+.nav-icon{font-size:15px;width:20px;text-align:center}
+.sidebar-section{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#333;padding:0.25rem 0;margin-top:0.5rem}
+.track-pill{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;color:#555;transition:all 0.15s}
+.track-pill:hover{color:#ccc}
+.track-pill .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sidebar-hours{background:#161616;border-radius:10px;padding:0.85rem;margin-top:auto}
+.sidebar-hours p{font-size:11px;color:#444;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em}
+.sidebar-hours .big{font-size:28px;font-weight:500;color:#e8e8e8}
+.sidebar-hours .sub{font-size:11px;color:#555;margin-top:2px}
+
+/* MAIN */
+.main{padding:1.5rem;overflow-y:auto}
+.page{display:none}.page.active{display:block}
+.page-header{margin-bottom:1.25rem}
+.page-header h2{font-size:20px;font-weight:500;color:#f0f0f0}
+.page-header p{font-size:13px;color:#555;margin-top:3px}
+
+/* CARDS */
+.card{background:#161616;border:0.5px solid #222;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:13px;font-weight:500;color:#aaa;margin-bottom:0.85rem;display:flex;align-items:center;gap:6px}
+
+/* LOG FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-full{grid-column:1/-1}
+label{font-size:11px;color:#555;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em}
+input,select,textarea{width:100%;background:#111;border:0.5px solid #2a2a2a;border-radius:8px;color:#e8e8e8;font-size:13px;padding:8px 10px;outline:none;transition:border-color 0.15s;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:#1D9E75}
+select option{background:#111}
+textarea{resize:vertical;min-height:60px}
+.form-row{display:flex;gap:8px;align-items:flex-end}
+.btn{padding:8px 16px;border-radius:8px;border:none;font-size:13px;cursor:pointer;transition:all 0.15s;font-family:inherit}
+.btn-primary{background:#1D9E75;color:#fff}.btn-primary:hover{background:#18866a}
+.btn-ghost{background:transparent;border:0.5px solid #2a2a2a;color:#666}.btn-ghost:hover{border-color:#444;color:#ccc}
+.btn-danger{background:transparent;border:0.5px solid #6b2020;color:#c45;font-size:11px;padding:4px 10px}.btn-danger:hover{background:#2a1010}
+
+/* LOG TABLE */
+.log-table{width:100%;border-collapse:collapse}
+.log-table th{font-size:11px;color:#444;text-align:left;padding:6px 10px;border-bottom:0.5px solid #1e1e1e;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+.log-table td{font-size:12px;color:#ccc;padding:10px 10px;border-bottom:0.5px solid #161616;vertical-align:middle}
+.log-table tr:hover td{background:#1a1a1a}
+.track-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:2px 8px;border-radius:4px}
+.phase-chip{font-size:10px;padding:2px 6px;border-radius:4px;background:#1a1a1a;color:#555;border:0.5px solid #222}
+.hours-cell{font-weight:500}
+.note-cell{color:#555;font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty-state{text-align:center;padding:3rem;color:#333;font-size:13px}
+
+/* ANALYTICS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
+.stat-card{background:#161616;border:0.5px solid #222;border-radius:10px;padding:1rem}
+.stat-num{font-size:22px;font-weight:500;color:#e8e8e8}
+.stat-lbl{font-size:11px;color:#555;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em}
+.stat-sub{font-size:11px;color:#1D9E75;margin-top:4px}
+
+/* CHART */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding:0 4px}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;border-radius:4px 4px 0 0;transition:height 0.4s ease;min-height:2px;cursor:pointer;position:relative}
+.bar:hover::after{content:attr(data-tip);position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:#222;color:#e8e8e8;font-size:10px;padding:3px 7px;border-radius:4px;white-space:nowrap;pointer-events:none}
+.bar-lbl{font-size:10px;color:#444;text-align:center;white-space:nowrap;overflow:hidden;width:100%}
+
+/* ALIGNMENT */
+.align-section{margin-bottom:0}
+.track-align-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid #1a1a1a}
+.track-align-row:last-child{border-bottom:none}
+.track-name-col{width:130px;font-size:12px;color:#888;display:flex;align-items:center;gap:7px}
+.align-bar-wrap{flex:1;display:flex;flex-direction:column;gap:3px}
+.align-bar-bg{height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden}
+.align-bar-fill{height:100%;border-radius:3px;transition:width 0.5s ease}
+.align-labels{display:flex;justify-content:space-between;font-size:10px;color:#444}
+.align-score{width:48px;text-align:right;font-size:12px;font-weight:500}
+.insight-box{background:#111;border-left:3px solid #1D9E75;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:8px;font-size:12px;color:#aaa;line-height:1.6}
+.insight-box.warn{border-color:#BA7517}
+.insight-box.good{border-color:#1D9E75}
+.insight-box.crit{border-color:#D85A30}
+.insight-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px}
+.insight-label.warn{color:#BA7517}.insight-label.good{color:#1D9E75}.insight-label.crit{color:#D85A30}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.cal-day-name{font-size:10px;color:#333;text-align:center;padding:2px}
+.cal-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:default;position:relative}
+.cal-cell.empty{background:transparent}
+.cal-cell.has-data{cursor:pointer}
+.cal-cell.today{outline:1.5px solid #1D9E75}
+.cal-num{font-size:9px;position:absolute;top:2px;left:4px;color:#333}
+.cal-legend{display:flex;align-items:center;gap:10px;margin-top:8px}
+.cal-legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#444}
+.cal-legend-dot{width:10px;height:10px;border-radius:2px}
+.month-nav{display:flex;align-items:center;gap:10px;margin-bottom:0.85rem}
+.month-nav button{background:transparent;border:0.5px solid #222;border-radius:6px;color:#666;padding:4px 10px;cursor:pointer;font-size:12px}
+.month-nav button:hover{border-color:#444;color:#ccc}
+.month-nav span{font-size:14px;font-weight:500;color:#e8e8e8;flex:1;text-align:center}
+
+/* RESPONSIVE */
+.section-label{font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:#444;margin-bottom:8px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">study<span>.</span>track</div>
+  <div>
+    <div class="nav-item active" onclick="showPage('log')" id="nav-log"><span class="nav-icon">📝</span> Log session</div>
+    <div class="nav-item" onclick="showPage('history')" id="nav-history"><span class="nav-icon">📋</span> History</div>
+    <div class="nav-item" onclick="showPage('analytics')" id="nav-analytics"><span class="nav-icon">📊</span> Analytics</div>
+    <div class="nav-item" onclick="showPage('alignment')" id="nav-alignment"><span class="nav-icon">🎯</span> Plan alignment</div>
+    <div class="nav-item" onclick="showPage('calendar')" id="nav-calendar"><span class="nav-icon">📅</span> Calendar</div>
+  </div>
+  <div>
+    <div class="sidebar-section">Tracks</div>
+    <div class="track-pill" onclick="filterTrack('cpp')"><span class="dot" style="background:#1D9E75"></span>C++</div>
+    <div class="track-pill" onclick="filterTrack('rhcsa')"><span class="dot" style="background:#378ADD"></span>RHCSA</div>
+    <div class="track-pill" onclick="filterTrack('k8s')"><span class="dot" style="background:#7F77DD"></span>Docker & K8s</div>
+    <div class="track-pill" onclick="filterTrack('os')"><span class="dot" style="background:#D85A30"></span>OS</div>
+    <div class="track-pill" onclick="filterTrack('net')"><span class="dot" style="background:#BA7517"></span>Networking</div>
+    <div class="track-pill" onclick="filterTrack('des')"><span class="dot" style="background:#D4537E"></span>System Design</div>
+  </div>
+  <div class="sidebar-hours">
+    <p>Total hours logged</p>
+    <div class="big" id="sb-total">0h</div>
+    <div class="sub" id="sb-week">This week: 0h</div>
+    <div class="sub" id="sb-streak" style="margin-top:4px">🔥 Streak: 0 days</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- LOG SESSION PAGE -->
+<div class="page active" id="page-log">
+  <div class="page-header">
+    <h2>Log a study session</h2>
+    <p>Record what you worked on, how long, and map it to your plan</p>
+  </div>
+  <div class="card">
+    <div class="form-grid">
+      <div>
+        <label>Date</label>
+        <input type="date" id="f-date">
+      </div>
+      <div>
+        <label>Hours spent</label>
+        <input type="number" id="f-hours" placeholder="e.g. 1.5" min="0.25" max="16" step="0.25">
+      </div>
+      <div>
+        <label>Track</label>
+        <select id="f-track" onchange="updateActivityOptions()">
+          <option value="">— select track —</option>
+          <option value="cpp">C++</option>
+          <option value="rhcsa">RHCSA</option>
+          <option value="k8s">Docker & Kubernetes</option>
+          <option value="os">Operating Systems</option>
+          <option value="net">Networking</option>
+          <option value="des">System Design</option>
+        </select>
+      </div>
+      <div>
+        <label>Activity type</label>
+        <select id="f-activity">
+          <option value="">— select track first —</option>
+        </select>
+      </div>
+      <div>
+        <label>Phase</label>
+        <select id="f-phase">
+          <option value="1">Phase 1 — Build foundations (months 1–3)</option>
+          <option value="2">Phase 2 — Go deeper (months 4–6)</option>
+          <option value="3">Phase 3 — Apply & certify (months 7–9)</option>
+        </select>
+      </div>
+      <div>
+        <label>Difficulty felt</label>
+        <select id="f-diff">
+          <option value="easy">Easy — clicked fast</option>
+          <option value="medium">Medium — had to think</option>
+          <option value="hard">Hard — struggled</option>
+          <option value="blocked">Blocked — need help</option>
+        </select>
+      </div>
+      <div class="form-full">
+        <label>What did you actually do? (optional)</label>
+        <textarea id="f-note" placeholder="e.g. Wrote a TCP echo server in C++, got the 3-way handshake working. Still confused about non-blocking I/O."></textarea>
+      </div>
+      <div class="form-full">
+        <button class="btn btn-primary" onclick="logSession()">+ Log session</button>
+        <span id="log-confirm" style="font-size:12px;color:#1D9E75;margin-left:10px;opacity:0;transition:opacity 0.3s"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick stats below form -->
+  <div class="three-col" style="margin-top:0">
+    <div class="card" style="margin-bottom:0">
+      <div class="stat-lbl">Today</div>
+      <div class="stat-num" id="qs-today">0h</div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="stat-lbl">This week</div>
+      <div class="stat-num" id="qs-week">0h</div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="stat-lbl">This month</div>
+      <div class="stat-num" id="qs-month">0h</div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY PAGE -->
+<div class="page" id="page-history">
+  <div class="page-header">
+    <h2>Session history</h2>
+    <p>All your logged sessions — click a row to delete</p>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:0.85rem 1rem;border-bottom:0.5px solid #1e1e1e;display:flex;gap:8px;align-items:center">
+      <select id="hist-track-filter" onchange="renderHistory()" style="width:160px;font-size:12px">
+        <option value="">All tracks</option>
+        <option value="cpp">C++</option>
+        <option value="rhcsa">RHCSA</option>
+        <option value="k8s">Docker & K8s</option>
+        <option value="os">OS</option>
+        <option value="net">Networking</option>
+        <option value="des">System Design</option>
+      </select>
+      <select id="hist-phase-filter" onchange="renderHistory()" style="width:160px;font-size:12px">
+        <option value="">All phases</option>
+        <option value="1">Phase 1</option>
+        <option value="2">Phase 2</option>
+        <option value="3">Phase 3</option>
+      </select>
+      <span style="font-size:11px;color:#444;margin-left:auto" id="hist-count"></span>
+    </div>
+    <div id="hist-table-wrap" style="overflow-x:auto">
+      <table class="log-table" id="hist-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Track</th>
+            <th>Activity</th>
+            <th>Phase</th>
+            <th>Hours</th>
+            <th>Difficulty</th>
+            <th>Note</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="hist-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYTICS PAGE -->
+<div class="page" id="page-analytics">
+  <div class="page-header">
+    <h2>Analytics</h2>
+    <p>How your time is distributed across tracks and weeks</p>
+  </div>
+  <div class="stats-grid" id="analytics-stats"></div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">⏱ Hours by track</div>
+      <div id="track-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📆 Last 8 weeks</div>
+      <div class="bar-chart" id="weekly-bars"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🧠 Activity breakdown</div>
+    <div id="activity-breakdown"></div>
+  </div>
+</div>
+
+<!-- ALIGNMENT PAGE -->
+<div class="page" id="page-alignment">
+  <div class="page-header">
+    <h2>Plan alignment</h2>
+    <p>Is your time going in the right direction for your 9-month plan?</p>
+  </div>
+  <div id="insights-box"></div>
+  <div class="card">
+    <div class="card-title">🎯 Time vs recommended split (per track)</div>
+    <div class="align-section" id="align-tracks"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📈 Phase focus</div>
+    <div id="phase-align"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 Pace check — hours/week to hit 9-month goal</div>
+    <div id="pace-check" style="font-size:13px;color:#aaa;line-height:1.8"></div>
+  </div>
+</div>
+
+<!-- CALENDAR PAGE -->
+<div class="page" id="page-calendar">
+  <div class="page-header">
+    <h2>Study calendar</h2>
+    <p>Your study days at a glance — darker = more hours</p>
+  </div>
+  <div class="card">
+    <div class="month-nav">
+      <button onclick="calPrev()">‹</button>
+      <span id="cal-month-label"></span>
+      <button onclick="calNext()">›</button>
+    </div>
+    <div class="cal-header">
+      <div class="cal-day-name">Sun</div><div class="cal-day-name">Mon</div><div class="cal-day-name">Tue</div>
+      <div class="cal-day-name">Wed</div><div class="cal-day-name">Thu</div><div class="cal-day-name">Fri</div>
+      <div class="cal-day-name">Sat</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-legend">
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#1a1a1a;border:0.5px solid #222"></div> No study</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#0a3326"></div> 1–2h</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#0d5c42"></div> 2–4h</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#1D9E75"></div> 4h+</div>
+    </div>
+  </div>
+  <div class="card" id="cal-day-detail" style="display:none">
+    <div class="card-title" id="cal-day-title"></div>
+    <div id="cal-day-sessions"></div>
+  </div>
+</div>
+
+</div><!-- end main -->
+</div><!-- end app -->
+
+<script>
+const STORE = 'studytrack_v1';
+const TRACKS = {
+  cpp:  {name:'C++',           color:'#1D9E75', rec:0.20},
+  rhcsa:{name:'RHCSA',         color:'#378ADD', rec:0.15},
+  k8s:  {name:'Docker & K8s',  color:'#7F77DD', rec:0.18},
+  os:   {name:'OS',            color:'#D85A30', rec:0.17},
+  net:  {name:'Networking',    color:'#BA7517', rec:0.15},
+  des:  {name:'System Design', color:'#D4537E', rec:0.15},
+};
+const ACTIVITIES = {
+  cpp:  ['Reading / theory','Writing code','Debugging','Project work','Code review','Watching video','Practice exercises'],
+  rhcsa:['Hands-on lab','Reading docs','Practice exam','Weak area drill','VM setup','Video course'],
+  k8s:  ['Docker hands-on','Kubernetes hands-on','Writing manifests','CI/CD pipeline','Reading docs','Video course','Project'],
+  os:   ['Reading OSTEP','Coding experiments','Kernel exploration','Video lecture','Practice problems'],
+  net:  ['Socket programming','Wireshark analysis','Reading book','Video course','Subnetting practice','Protocol deep dive'],
+  des:  ['System design problem','OOP coding','SOLID refactor','Design pattern impl','Mock interview','Reading book','Whiteboard design'],
+};
+const DIFF_COLOR = {easy:'#1D9E75',medium:'#BA7517',hard:'#D85A30',blocked:'#c44'};
+
+// State
+let sessions = [];
+let calYear, calMonth;
+
+function load() {
+  try { sessions = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch(e) { sessions = []; }
+  const now = new Date();
+  calYear = now.getFullYear(); calMonth = now.getMonth();
+}
+function save() { localStorage.setItem(STORE, JSON.stringify(sessions)); }
+
+// NAV
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nav-'+p).classList.add('active');
+  if(p==='history') renderHistory();
+  if(p==='analytics') renderAnalytics();
+  if(p==='alignment') renderAlignment();
+  if(p==='calendar') renderCalendar();
+  updateSidebar();
+}
+
+// FORM
+function updateActivityOptions() {
+  const t = document.getElementById('f-track').value;
+  const sel = document.getElementById('f-activity');
+  sel.innerHTML = t
+    ? ACTIVITIES[t].map(a => `<option value="${a}">${a}</option>`).join('')
+    : '<option>— select track first —</option>';
+}
+
+function logSession() {
+  const date = document.getElementById('f-date').value;
+  const hours = parseFloat(document.getElementById('f-hours').value);
+  const track = document.getElementById('f-track').value;
+  const activity = document.getElementById('f-activity').value;
+  const phase = document.getElementById('f-phase').value;
+  const diff = document.getElementById('f-diff').value;
+  const note = document.getElementById('f-note').value.trim();
+  if(!date || !hours || !track || !activity) { alert('Please fill in date, hours, track and activity.'); return; }
+  sessions.push({ id: Date.now(), date, hours, track, activity, phase, diff, note });
+  sessions.sort((a,b) => b.date.localeCompare(a.date));
+  save(); updateSidebar(); updateQuickStats();
+  const c = document.getElementById('log-confirm');
+  c.textContent = '✓ Logged ' + hours + 'h on ' + TRACKS[track].name;
+  c.style.opacity = 1;
+  setTimeout(()=>c.style.opacity=0, 2500);
+  document.getElementById('f-hours').value = '';
+  document.getElementById('f-note').value = '';
+}
+
+// QUICK STATS
+function updateQuickStats() {
+  const today = new Date().toISOString().slice(0,10);
+  const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+  const monthAgo = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+  const sum = (filter) => sessions.filter(filter).reduce((a,s)=>a+s.hours,0);
+  document.getElementById('qs-today').textContent = sum(s=>s.date===today).toFixed(1)+'h';
+  document.getElementById('qs-week').textContent = sum(s=>s.date>=weekAgo).toFixed(1)+'h';
+  document.getElementById('qs-month').textContent = sum(s=>s.date>=monthAgo).toFixed(1)+'h';
+}
+
+// SIDEBAR
+function updateSidebar() {
+  const total = sessions.reduce((a,s)=>a+s.hours,0);
+  const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+  const week = sessions.filter(s=>s.date>=weekAgo).reduce((a,s)=>a+s.hours,0);
+  document.getElementById('sb-total').textContent = total.toFixed(1)+'h';
+  document.getElementById('sb-week').textContent = 'This week: '+week.toFixed(1)+'h';
+  // streak
+  const days = [...new Set(sessions.map(s=>s.date))].sort().reverse();
+  let streak = 0;
+  let d = new Date(); d.setHours(0,0,0,0);
+  for(let i=0;i<days.length;i++){
+    const sd = new Date(days[i]+'T00:00:00');
+    const diff = Math.round((d-sd)/86400000);
+    if(diff===streak) streak++;
+    else break;
+    d = sd;
+  }
+  document.getElementById('sb-streak').textContent = '🔥 Streak: '+streak+' day'+(streak!==1?'s':'');
+}
+
+function filterTrack(t) {
+  showPage('history');
+  document.getElementById('hist-track-filter').value = t;
+  renderHistory();
+}
+
+// HISTORY
+function renderHistory() {
+  const tf = document.getElementById('hist-track-filter').value;
+  const pf = document.getElementById('hist-phase-filter').value;
+  let data = sessions.filter(s => (!tf||s.track===tf) && (!pf||s.phase===pf));
+  document.getElementById('hist-count').textContent = data.length+' sessions · '+data.reduce((a,s)=>a+s.hours,0).toFixed(1)+'h total';
+  const tbody = document.getElementById('hist-body');
+  if(!data.length){
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No sessions logged yet.<br>Head to "Log session" to add your first one.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(s => {
+    const tr = TRACKS[s.track];
+    return `<tr>
+      <td>${fmtDate(s.date)}</td>
+      <td><span class="track-badge" style="background:${tr.color}18;color:${tr.color}">${tr.name}</span></td>
+      <td>${s.activity}</td>
+      <td><span class="phase-chip">Phase ${s.phase}</span></td>
+      <td class="hours-cell" style="color:${tr.color}">${s.hours}h</td>
+      <td><span style="color:${DIFF_COLOR[s.diff]};font-size:11px">${s.diff}</span></td>
+      <td class="note-cell" title="${s.note}">${s.note||'—'}</td>
+      <td><button class="btn-danger btn" onclick="deleteSession(${s.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteSession(id) {
+  if(!confirm('Delete this session?')) return;
+  sessions = sessions.filter(s=>s.id!==id);
+  save(); renderHistory(); updateSidebar(); updateQuickStats();
+}
+
+function fmtDate(d) {
+  const [y,m,day] = d.split('-');
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+' '+day+', '+y;
+}
+
+// ANALYTICS
+function renderAnalytics() {
+  const total = sessions.reduce((a,s)=>a+s.hours,0);
+  const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+  const week = sessions.filter(s=>s.date>=weekAgo).reduce((a,s)=>a+s.hours,0);
+  const days = new Set(sessions.map(s=>s.date)).size;
+  const avg = days ? (total/days).toFixed(1) : 0;
+  document.getElementById('analytics-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total.toFixed(1)}h</div><div class="stat-lbl">Total logged</div></div>
+    <div class="stat-card"><div class="stat-num">${week.toFixed(1)}h</div><div class="stat-lbl">This week</div></div>
+    <div class="stat-card"><div class="stat-num">${days}</div><div class="stat-lbl">Study days</div></div>
+    <div class="stat-card"><div class="stat-num">${avg}h</div><div class="stat-lbl">Avg per day</div></div>
+  `;
+  // Track bars
+  const trackHours = {};
+  Object.keys(TRACKS).forEach(t=>trackHours[t]=0);
+  sessions.forEach(s=>trackHours[s.track]=(trackHours[s.track]||0)+s.hours);
+  const maxH = Math.max(...Object.values(trackHours),1);
+  document.getElementById('track-bars').innerHTML = Object.entries(TRACKS).map(([id,tr])=>{
+    const h = trackHours[id]||0;
+    const pct = Math.round(h/maxH*100);
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="width:120px;font-size:12px;color:#666">${tr.name}</span>
+      <div style="flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${tr.color};border-radius:3px;transition:width 0.4s"></div>
+      </div>
+      <span style="width:36px;text-align:right;font-size:12px;color:${tr.color}">${h.toFixed(1)}h</span>
+    </div>`;
+  }).join('');
+  // Weekly bars
+  const weeks = [];
+  for(let i=7;i>=0;i--){
+    const start = new Date(Date.now()-i*7*86400000);
+    const end = new Date(Date.now()-(i-1)*7*86400000);
+    const label = (start.getMonth()+1)+'/'+(start.getDate());
+    const h = sessions.filter(s=>{const d=new Date(s.date+'T00:00:00');return d>=start&&d<end;}).reduce((a,s)=>a+s.hours,0);
+    weeks.push({label,h});
+  }
+  const maxW = Math.max(...weeks.map(w=>w.h),1);
+  document.getElementById('weekly-bars').innerHTML = weeks.map(w=>`
+    <div class="bar-wrap">
+      <div class="bar" style="height:${Math.max(w.h/maxW*100,2)}px;background:#1D9E75;opacity:${0.4+w.h/maxW*0.6}" data-tip="${w.h.toFixed(1)}h"></div>
+      <div class="bar-lbl">${w.label}</div>
+    </div>`).join('');
+  // Activity breakdown
+  const acts = {};
+  sessions.forEach(s=>{ const k=s.track+'|'+s.activity; acts[k]=(acts[k]||{track:s.track,activity:s.activity,h:0}); acts[k].h+=s.hours; });
+  const sorted = Object.values(acts).sort((a,b)=>b.h-a.h).slice(0,10);
+  const maxA = Math.max(...sorted.map(a=>a.h),1);
+  document.getElementById('activity-breakdown').innerHTML = sorted.length ? sorted.map(a=>{
+    const tr = TRACKS[a.track];
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span class="track-badge" style="background:${tr.color}18;color:${tr.color};width:110px;justify-content:center">${tr.name}</span>
+      <span style="width:140px;font-size:12px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.activity}</span>
+      <div style="flex:1;height:5px;background:#1a1a1a;border-radius:3px;overflow:hidden">
+        <div style="width:${Math.round(a.h/maxA*100)}%;height:100%;background:${tr.color};border-radius:3px"></div>
+      </div>
+      <span style="width:36px;text-align:right;font-size:12px;color:${tr.color}">${a.h.toFixed(1)}h</span>
+    </div>`;
+  }).join('') : '<div class="empty-state" style="padding:1rem">No sessions logged yet.</div>';
+}
+
+// ALIGNMENT
+function renderAlignment() {
+  const total = sessions.reduce((a,s)=>a+s.hours,0);
+  const trackH = {};
+  const phaseH = {1:0,2:0,3:0};
+  Object.keys(TRACKS).forEach(t=>trackH[t]=0);
+  sessions.forEach(s=>{ trackH[s.track]=(trackH[s.track]||0)+s.hours; phaseH[s.phase]=(phaseH[s.phase]||0)+s.hours; });
+
+  // Insights
+  const insights = [];
+  const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+  const weekH = sessions.filter(s=>s.date>=weekAgo).reduce((a,s)=>a+s.hours,0);
+  const TARGET_WEEK = 10;
+  if(weekH < TARGET_WEEK*0.5) insights.push({type:'crit', label:'Behind pace', msg:`You logged only ${weekH.toFixed(1)}h this week. Target is ~${TARGET_WEEK}h/week. Try to squeeze in at least one daily session.`});
+  else if(weekH < TARGET_WEEK*0.8) insights.push({type:'warn', label:'Slightly behind', msg:`${weekH.toFixed(1)}h this week — close but a bit short of the ${TARGET_WEEK}h target. One extra session would help.`});
+  else insights.push({type:'good', label:'On pace', msg:`Great — ${weekH.toFixed(1)}h this week, you're meeting the ~${TARGET_WEEK}h/week target!`});
+
+  if(total > 0) {
+    const dominated = Object.entries(trackH).sort((a,b)=>b[1]-a[1])[0];
+    const pctDom = dominated[1]/total;
+    if(pctDom > 0.45) insights.push({type:'warn', label:'Imbalanced focus', msg:`${Math.round(pctDom*100)}% of your time is on ${TRACKS[dominated[0]].name}. Make sure other tracks aren't being neglected.`});
+    const zeroTracks = Object.entries(trackH).filter(([,h])=>h===0).map(([t])=>TRACKS[t].name);
+    if(zeroTracks.length > 0) insights.push({type:'crit', label:'Untouched tracks', msg:`No hours logged yet on: ${zeroTracks.join(', ')}. All 6 tracks need attention across the 9 months.`});
+    const blocked = sessions.filter(s=>s.diff==='blocked');
+    if(blocked.length > 2) insights.push({type:'warn', label:'Recurring blocks', msg:`${blocked.length} sessions marked as "blocked". Consider asking for help, joining a study group, or switching resources.`});
+  } else {
+    insights.push({type:'warn', label:'No data yet', msg:'Start logging sessions to get personalised alignment insights.'});
+  }
+
+  document.getElementById('insights-box').innerHTML = insights.map(i=>`
+    <div class="insight-box ${i.type}"><div class="insight-label ${i.type}">${i.label}</div>${i.msg}</div>`).join('');
+
+  // Track alignment bars
+  document.getElementById('align-tracks').innerHTML = Object.entries(TRACKS).map(([id,tr])=>{
+    const actual = total ? (trackH[id]||0)/total : 0;
+    const rec = tr.rec;
+    const score = total ? Math.min(actual/rec,2) : 0;
+    const barColor = score < 0.5 ? '#D85A30' : score < 0.85 ? '#BA7517' : '#1D9E75';
+    return `<div class="track-align-row">
+      <div class="track-name-col"><span style="width:8px;height:8px;border-radius:50%;background:${tr.color};display:inline-block;flex-shrink:0"></span>${tr.name}</div>
+      <div class="align-bar-wrap">
+        <div class="align-bar-bg"><div class="align-bar-fill" style="width:${Math.min(score/2,1)*100}%;background:${barColor}"></div></div>
+        <div class="align-labels"><span>0%</span><span>Recommended ${Math.round(rec*100)}%</span><span>2×</span></div>
+      </div>
+      <div class="align-score" style="color:${barColor}">${Math.round(actual*100)}%</div>
+    </div>`;
+  }).join('');
+
+  // Phase alignment
+  const phaseTotal = Object.values(phaseH).reduce((a,b)=>a+b,0);
+  const phaseNames = {1:'Phase 1 — Foundations',2:'Phase 2 — Go deeper',3:'Phase 3 — Certify'};
+  const phaseColors = {1:'#5DCAA5',2:'#85B7EB',3:'#AFA9EC'};
+  document.getElementById('phase-align').innerHTML = [1,2,3].map(p=>{
+    const h = phaseH[p]||0;
+    const pct = phaseTotal ? h/phaseTotal : 0;
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="width:180px;font-size:12px;color:#666">${phaseNames[p]}</span>
+      <div style="flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden">
+        <div style="width:${Math.round(pct*100)}%;height:100%;background:${phaseColors[p]};border-radius:3px;transition:width 0.5s"></div>
+      </div>
+      <span style="width:54px;text-align:right;font-size:12px;color:${phaseColors[p]}">${h.toFixed(1)}h (${Math.round(pct*100)}%)</span>
+    </div>`;
+  }).join('');
+
+  // Pace check
+  const TARGET_TOTAL = 350;
+  const remaining = Math.max(TARGET_TOTAL - total, 0);
+  const weeksLeft = 39; // ~9 months
+  const weeklyNeeded = (remaining/weeksLeft).toFixed(1);
+  const onTrack = weekH >= weeklyNeeded * 0.8;
+  document.getElementById('pace-check').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="stat-card" style="margin-bottom:0"><div class="stat-num">${TARGET_TOTAL}h</div><div class="stat-lbl">9-month target</div></div>
+      <div class="stat-card" style="margin-bottom:0"><div class="stat-num">${total.toFixed(0)}h</div><div class="stat-lbl">Logged so far</div></div>
+      <div class="stat-card" style="margin-bottom:0"><div class="stat-num" style="color:${onTrack?'#1D9E75':'#D85A30'}">${weeklyNeeded}h</div><div class="stat-lbl">Needed per week</div></div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:#555;line-height:1.8">
+      Target: ~${TARGET_TOTAL}h over 9 months (≈${(TARGET_TOTAL/39).toFixed(1)}h/week across all tracks). 
+      You need <strong style="color:#e8e8e8">${weeklyNeeded}h/week</strong> from here to stay on track. 
+      <span style="color:${onTrack?'#1D9E75':'#D85A30'}">${onTrack ? '✓ You\'re on pace this week.' : '↑ Pick up the pace — you\'re behind this week.'}</span>
+    </div>`;
+}
+
+// CALENDAR
+function renderCalendar() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = monthNames[calMonth]+' '+calYear;
+  const byDate = {};
+  sessions.forEach(s=>{ byDate[s.date]=(byDate[s.date]||0)+s.hours; });
+  const today = new Date().toISOString().slice(0,10);
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  let html = '';
+  for(let i=0;i<firstDay;i++) html += '<div class="cal-cell empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const ds = calYear+'-'+(String(calMonth+1).padStart(2,'0'))+'-'+(String(d).padStart(2,'0'));
+    const h = byDate[ds]||0;
+    const bg = h===0?'#1a1a1a':h<=2?'#0a3326':h<=4?'#0d5c42':'#1D9E75';
+    const isToday = ds===today ? ' today' : '';
+    html += `<div class="cal-cell has-data${isToday}" style="background:${bg}" onclick="showCalDay('${ds}')">
+      <div class="cal-num">${d}</div>
+    </div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+  document.getElementById('cal-day-detail').style.display = 'none';
+}
+
+function showCalDay(ds) {
+  const daySessions = sessions.filter(s=>s.date===ds);
+  if(!daySessions.length) return;
+  const detail = document.getElementById('cal-day-detail');
+  document.getElementById('cal-day-title').textContent = fmtDate(ds)+' — '+daySessions.reduce((a,s)=>a+s.hours,0).toFixed(1)+'h';
+  document.getElementById('cal-day-sessions').innerHTML = daySessions.map(s=>{
+    const tr=TRACKS[s.track];
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:0.5px solid #1a1a1a">
+      <span class="track-badge" style="background:${tr.color}18;color:${tr.color};flex-shrink:0">${tr.name}</span>
+      <span style="font-size:12px;color:#aaa;flex:1">${s.activity}</span>
+      <span style="font-size:12px;color:${tr.color};font-weight:500">${s.hours}h</span>
+      <span style="font-size:11px;color:${DIFF_COLOR[s.diff]}">${s.diff}</span>
+    </div>`;
+  }).join('');
+  detail.style.display = 'block';
+}
+
+function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+
+// INIT
+load();
+document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+updateSidebar();
+updateQuickStats();
+</script>
+<nav style="display:none;position:fixed;bottom:0;left:0;right:0;background:#111;border-top:0.5px solid #1e1e1e;padding:8px 0;padding-bottom:env(safe-area-inset-bottom);z-index:100;justify-content:space-around" id="bottomBar"><a style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;text-decoration:none;color:#555;font-size:10px" href="index.html"><span style="font-size:20px">📋</span>Plan</a><a style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;text-decoration:none;color:#1D9E75;font-size:10px" href="tracker.html"><span style="font-size:20px">⏱</span>Tracker</a><a style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;text-decoration:none;color:#555;font-size:10px" href="daily.html"><span style="font-size:20px">🌅</span>Daily</a></nav><script>if(window.innerWidth<=768)document.getElementById("bottomBar").style.display="flex";window.addEventListener("resize",()=>{document.getElementById("bottomBar").style.display=window.innerWidth<=768?"flex":"none";});if("serviceWorker"in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script></body>
+</html>

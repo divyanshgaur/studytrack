@@ -13,19 +13,8 @@
   ],
   "categories": ["education", "productivity"],
   "shortcuts": [
-    {
-      "name": "Log Session",
-      "short_name": "Log",
-      "description": "Log a study session",
-      "url": "/tracker.html",
-      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "My Plan",
-      "short_name": "Plan",
-      "description": "View 9-month career plan",
-      "url": "/index.html",
-      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
-    }
+    { "name": "Daily Focus", "short_name": "Daily", "url": "/daily.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Log Session", "short_name": "Log", "url": "/tracker.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "My Plan", "short_name": "Plan", "url": "/index.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }
