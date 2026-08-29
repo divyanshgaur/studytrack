@@ -291,7 +291,7 @@ Keep the tone: sharp, practical, like a senior engineer who respects your time. 
     const response=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.apiKey},
-      body:JSON.stringify({model:'llama-3.1-8b-instant',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'openai/gpt-oss-20b',max_tokens:1000,messages:[{role:'user',content:prompt}]})
     });
     clearInterval(msgInterval);
     if(!response.ok){
