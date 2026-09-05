@@ -357,6 +357,7 @@ textarea{resize:vertical;min-height:60px}
 </div><!-- end app -->
 
 <script>
+import { saveSessions, loadSessions, deleteSession as deleteSessionDB, showSyncStatus } from './db.js';
 const STORE = 'studytrack_v1';
 const TRACKS = {
   cpp:  {name:'C++',           color:'#1D9E75', rec:0.20},
@@ -380,12 +381,12 @@ const DIFF_COLOR = {easy:'#1D9E75',medium:'#BA7517',hard:'#D85A30',blocked:'#c44
 let sessions = [];
 let calYear, calMonth;
 
-function load() {
-  try { sessions = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch(e) { sessions = []; }
+async function load() {
+  try { sessions = await loadSessions(); } catch(e) { sessions = []; }
   const now = new Date();
   calYear = now.getFullYear(); calMonth = now.getMonth();
 }
-function save() { localStorage.setItem(STORE, JSON.stringify(sessions)); }
+async function save() { await saveSessions(sessions); }
 
 // NAV
 function showPage(p) {
@@ -409,7 +410,7 @@ function updateActivityOptions() {
     : '<option>— select track first —</option>';
 }
 
-function logSession() {
+async function logSession() {
   const date = document.getElementById('f-date').value;
   const hours = parseFloat(document.getElementById('f-hours').value);
   const track = document.getElementById('f-track').value;
@@ -420,7 +421,7 @@ function logSession() {
   if(!date || !hours || !track || !activity) { alert('Please fill in date, hours, track and activity.'); return; }
   sessions.push({ id: Date.now(), date, hours, track, activity, phase, diff, note });
   sessions.sort((a,b) => b.date.localeCompare(a.date));
-  save(); updateSidebar(); updateQuickStats();
+  await save(); updateSidebar(); updateQuickStats();
   const c = document.getElementById('log-confirm');
   c.textContent = '✓ Logged ' + hours + 'h on ' + TRACKS[track].name;
   c.style.opacity = 1;
@@ -493,10 +494,10 @@ function renderHistory() {
   }).join('');
 }
 
-function deleteSession(id) {
+async function deleteSession(id) {
   if(!confirm('Delete this session?')) return;
-  sessions = sessions.filter(s=>s.id!==id);
-  save(); renderHistory(); updateSidebar(); updateQuickStats();
+  sessions = await deleteSessionDB(id);
+  renderHistory(); updateSidebar(); updateQuickStats();
 }
 
 function fmtDate(d) {
@@ -694,10 +695,10 @@ function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal
 function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
 
 // INIT
-load();
+(async()=>{await load();
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
 updateSidebar();
-updateQuickStats();
+updateQuickStats();})();
 </script>
 <nav style="display:none;position:fixed;bottom:0;left:0;right:0;background:#111;border-top:0.5px solid #1e1e1e;padding:8px 0;padding-bottom:env(safe-area-inset-bottom);z-index:100;justify-content:space-around" id="bottomBar"><a style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;text-decoration:none;color:#555;font-size:10px" href="index.html"><span style="font-size:20px">📋</span>Plan</a><a style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;text-decoration:none;color:#1D9E75;font-size:10px" href="tracker.html"><span style="font-size:20px">⏱</span>Tracker</a><a style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;text-decoration:none;color:#555;font-size:10px" href="daily.html"><span style="font-size:20px">🌅</span>Daily</a></nav><script>if(window.innerWidth<=768)document.getElementById("bottomBar").style.display="flex";window.addEventListener("resize",()=>{document.getElementById("bottomBar").style.display=window.innerWidth<=768?"flex":"none";});if("serviceWorker"in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script></body>
 </html>
